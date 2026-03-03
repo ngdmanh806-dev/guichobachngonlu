@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-blue: #3b82f6;
+  --secondary-purple: #a855f7;
+  --accent-teal: #14b8a6;
+  --bg-light: #f9fafb;
+}
+
+body {
+  @apply bg-gray-50 text-gray-800 font-sans;
+  font-family: "Inter", sans-serif;
+}
+
+.kpi-card {
+  @apply bg-white p-6 rounded-xl border border-gray-100 shadow-sm transition-all hover:shadow-md;
+}
