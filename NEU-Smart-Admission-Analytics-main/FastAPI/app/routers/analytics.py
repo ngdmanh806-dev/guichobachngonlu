@@ -9,7 +9,8 @@ from app.repository.analytics_repo import (
 	get_view_admission_data,
 	get_data_quality_stats,
 )
-from app.schemas import DashboardAnalyticsResponse
+from typing import Optional
+from app.schemas import DashboardAnalyticsResponse, PaginatedStudents, InsightsResponse
 from app.services.analytics import (
 	analyze_score_distribution,
 	build_thpt_subject_analysis_chart,
@@ -17,6 +18,8 @@ from app.services.analytics import (
 	format_score_distribution_chart,
 	map_major_items,
 	map_province_items,
+	fetch_students,
+	fetch_insights,
 )
 from app.services.visualization import (
 	format_major_admission_chart,
@@ -88,3 +91,32 @@ def get_chart_analytics(year: int = 2024, db: Session = Depends(get_db)):
 			status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
 			detail=f"Không thể lấy chart analytics: {str(exc)}",
 		) from exc
+
+
+@router.get("/students", response_model=PaginatedStudents)
+def get_students(
+    page: int = 1,
+    pageSize: int = 50,
+    sort: str = "score_desc",
+    major: Optional[str] = None,
+    province: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    try:
+        return fetch_students(db, page, pageSize, sort, major, province)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Không thể lấy danh sách sinh viên: {str(exc)}",
+        ) from exc
+
+
+@router.get("/insights", response_model=InsightsResponse)
+def get_insights(db: Session = Depends(get_db)):
+    try:
+        return fetch_insights(db)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Không thể lấy insights analytics: {str(exc)}",
+        ) from exc

@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import analytics
+from app.routers import analytics, ui
 from app.core.database import Base, engine
 
 # Tạo bảng nếu chưa có (trong thực tế nên dùng Alembic)
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Admission Analytics API")
 
@@ -18,6 +18,7 @@ app.add_middleware(
 )
 
 app.include_router(analytics.router)
+app.include_router(ui.router)
 
 @app.get("/")
 def read_root():

@@ -195,3 +195,148 @@ def get_demographics_by_province(db: Session, nam_tuyen_sinh: int = 2024) -> pd.
     
     df = pd.read_sql(query.statement, db.bind)
     return df if not df.empty else pd.DataFrame(columns=["QueQuan", "so_luong"])
+
+
+def get_paginated_students(
+    db: Session,
+    page: int = 1,
+    pageSize: int = 50,
+    sort: str = "score_desc",
+    major: str = None,
+    province: str = None
+) -> dict:
+    """
+    Lấy danh sách sinh viên phân trang phục vụ frontend (StudentTable.jsx)
+    """
+    limit = min(pageSize, 100)
+    offset = (page - 1) * limit
+    
+    query = db.query(
+        ViewPhanTichTuyenSinh.CCCD.label("cccd"),
+        ViewPhanTichTuyenSinh.HoTen.label("hoTen"),
+        ViewPhanTichTuyenSinh.GioiTinh.label("gioiTinh"),
+        ViewPhanTichTuyenSinh.QueQuan.label("queQuan"),
+        ViewPhanTichTuyenSinh.TenNganh.label("tenNganh"),
+        ViewPhanTichTuyenSinh.DiemXetTuyen.label("diemXetTuyen")
+    )
+    
+    if major:
+        query = query.filter(ViewPhanTichTuyenSinh.TenNganh == major)
+    if province:
+        query = query.filter(ViewPhanTichTuyenSinh.QueQuan == province)
+        
+    ALLOWED_SORT = {
+        "score_desc": ViewPhanTichTuyenSinh.DiemXetTuyen.desc(),
+        "score_asc": ViewPhanTichTuyenSinh.DiemXetTuyen.asc()
+    }
+    
+    sort_column = ALLOWED_SORT.get(sort, ViewPhanTichTuyenSinh.DiemXetTuyen.desc())
+    
+    total = query.count()
+    query = query.order_by(sort_column).limit(limit).offset(offset)
+    
+    rows = query.all()
+    
+    data = []
+    for row in rows:
+        data.append({
+            "cccd": row.cccd if row.cccd else "",
+            "hoTen": row.hoTen if row.hoTen else "",
+            "gioiTinh": row.gioiTinh if row.gioiTinh else "",
+            "queQuan": row.queQuan if row.queQuan else "",
+            "tenNganh": row.tenNganh if row.tenNganh else "",
+            "diemXetTuyen": float(row.diemXetTuyen) if row.diemXetTuyen is not None else 0.0
+        })
+        
+    return {
+        "total": total,
+        "page": page,
+        "pageSize": pageSize,
+        "data": data
+    }
+
+
+def get_database_insights(db: Session) -> dict:
+    """
+    Thống kê tổng quan dựa theo schema SQL 
+    Chứa top major, top province, min/max score, histogram bằng SQL CASE
+    """
+    from sqlalchemy import case
+    
+    # Top major bằng Average score
+    top_major_query = (
+        db.query(
+            ViewPhanTichTuyenSinh.TenNganh.label("tenNganh"),
+            func.avg(ViewPhanTichTuyenSinh.DiemXetTuyen).label("average_score")
+        )
+        .group_by(ViewPhanTichTuyenSinh.TenNganh)
+        .order_by(func.avg(ViewPhanTichTuyenSinh.DiemXetTuyen).desc())
+        .limit(1)
+        .first()
+    )
+    top_major = {
+        "tenNganh": top_major_query.tenNganh if top_major_query else "N/A",
+        "average_score": float(top_major_query.average_score) if top_major_query and top_major_query.average_score is not None else 0.0
+    }
+    
+    # Top province
+    top_province_query = (
+        db.query(
+            ViewPhanTichTuyenSinh.QueQuan.label("queQuan"),
+            func.count(ViewPhanTichTuyenSinh.CCCD).label("student_count")
+        )
+        .group_by(ViewPhanTichTuyenSinh.QueQuan)
+        .order_by(func.count(ViewPhanTichTuyenSinh.CCCD).desc())
+        .limit(1)
+        .first()
+    )
+    top_province = {
+        "queQuan": top_province_query.queQuan if top_province_query else "N/A",
+        "student_count": int(top_province_query.student_count) if top_province_query else 0
+    }
+    
+    # Score statistics
+    stats_query = (
+        db.query(
+            func.avg(ViewPhanTichTuyenSinh.DiemXetTuyen).label("average"),
+            func.max(ViewPhanTichTuyenSinh.DiemXetTuyen).label("max"),
+            func.min(ViewPhanTichTuyenSinh.DiemXetTuyen).label("min")
+        )
+        .filter(ViewPhanTichTuyenSinh.DiemXetTuyen > 0)
+        .first()
+    )
+    score_statistics = {
+        "average": float(stats_query.average) if stats_query and stats_query.average is not None else 0.0,
+        "max": float(stats_query.max) if stats_query and stats_query.max is not None else 0.0,
+        "min": float(stats_query.min) if stats_query and stats_query.min is not None else 0.0
+    }
+    
+    # Score distribution histogram theo SQL CASE
+    distribution_query = (
+        db.query(
+            case(
+                (ViewPhanTichTuyenSinh.DiemXetTuyen.between(18, 20), '18-20'),
+                ((ViewPhanTichTuyenSinh.DiemXetTuyen > 20) & (ViewPhanTichTuyenSinh.DiemXetTuyen <= 22), '20-22'),
+                ((ViewPhanTichTuyenSinh.DiemXetTuyen > 22) & (ViewPhanTichTuyenSinh.DiemXetTuyen <= 24), '22-24'),
+                ((ViewPhanTichTuyenSinh.DiemXetTuyen > 24) & (ViewPhanTichTuyenSinh.DiemXetTuyen <= 26), '24-26'),
+                else_='26-30'
+            ).label("range"),
+            func.count(ViewPhanTichTuyenSinh.CCCD).label("count")
+        )
+        .group_by("range")
+        .all()
+    )
+    
+    score_distribution = []
+    for row in distribution_query:
+        score_distribution.append({
+            "range": row.range,
+            "count": int(row.count)
+        })
+        
+    return {
+        "top_major": top_major,
+        "top_province": top_province,
+        "score_statistics": score_statistics,
+        "score_distribution": score_distribution
+    }

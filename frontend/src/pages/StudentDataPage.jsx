@@ -1,8 +1,17 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import StudentTable from "../components/StudentTable";
 import { Search, Filter, Download } from "lucide-react";
+import API from "../services/api";
 
 const StudentDataPage = () => {
+  const [studentData, setStudentData] = useState({ total: 0, page: 1, pageSize: 10, data: [] });
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    API.get(`/ui/students?page=${page}&pageSize=10`)
+      .then((res) => setStudentData(res.data))
+      .catch(console.error);
+  }, [page]);
   return (
     <div className="ml-64 p-8 min-h-screen">
       <div className="flex justify-between items-center mb-8">
@@ -32,18 +41,26 @@ const StudentDataPage = () => {
           </div>
         </div>
 
-        <StudentTable />
+        <StudentTable students={studentData.data} />
 
         <div className="p-6 border-t border-gray-50 flex justify-between items-center text-sm text-gray-500">
-          <span>Showing 1 to 10 of 20 entries</span>
+          <span>Showing {((page - 1) * 10) + 1} to {Math.min(page * 10, studentData.total)} of {studentData.total} entries</span>
           <div className="flex gap-2">
-            <button className="px-3 py-1 border rounded hover:bg-gray-50">
+            <button 
+              className="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
               Prev
             </button>
             <button className="px-3 py-1 bg-blue-600 text-white rounded">
-              1
+              {page}
             </button>
-            <button className="px-3 py-1 border rounded hover:bg-gray-50">
+            <button 
+              className="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50"
+              onClick={() => setPage(p => p + 1)}
+              disabled={page * 10 >= studentData.total}
+            >
               Next
             </button>
           </div>
