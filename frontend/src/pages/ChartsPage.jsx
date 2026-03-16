@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -14,14 +14,22 @@ import {
   Line,
   Legend,
 } from "recharts";
+import Legend from "recharts";
+import API from "../services/api";
 
 const ChartsPage = () => {
-  const data = [
+  const [data, setData] = useState([
     { name: "IT01", gpa: 3.8, attendance: 95 },
     { name: "IT02", gpa: 3.4, attendance: 88 },
     { name: "IT03", gpa: 3.2, attendance: 82 },
     { name: "EC01", gpa: 3.6, attendance: 90 },
-  ];
+  ]);
+
+  useEffect(() => {
+    API.get("/ui/charts")
+      .then((res) => setData(res.data))
+      .catch(console.error);
+  }, []);
 
   const COLORS = ["#3b82f6", "#a855f7", "#14b8a6", "#f59e0b"];
 

@@ -131,6 +131,7 @@ class ViewPhanTichTuyenSinh(Base):
     HoTen = Column(String(255))
     GioiTinh = Column(String(10))
     NgaySinh = Column(Date)
+    QueQuan = Column(String(255))
 
     # Ngành và Khối
     TenNganh = Column(String(255))

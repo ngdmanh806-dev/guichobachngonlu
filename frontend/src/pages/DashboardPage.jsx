@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -15,14 +15,26 @@ import {
 } from "recharts";
 import { Users, GraduationCap, Clock, Award } from "lucide-react";
 import StudentTable from "../components/StudentTable";
+import API from "../services/api";
 
 const DashboardPage = () => {
-  // Dữ liệu mẫu khớp với hình ảnh minh họa
-  const gpaData = [
-    { name: "IT01", gpa: 3.8 },
-    { name: "IT02", gpa: 3.4 },
-    { name: "IT03", gpa: 3.2 },
-  ];
+  const [dashboardData, setDashboardData] = useState({
+    kpis: { totalStudents: 20, averageGPA: 3.44, attendanceRate: "88.8%", excellentStudents: "40%" },
+    gpaData: [
+      { name: "IT01", gpa: 3.8 },
+      { name: "IT02", gpa: 3.4 },
+      { name: "IT03", gpa: 3.2 },
+    ],
+    genderDistribution: []
+  });
+
+  useEffect(() => {
+    API.get("/ui/dashboard")
+      .then((res) => setDashboardData(res.data))
+      .catch(console.error);
+  }, []);
+
+  const { kpis, gpaData, genderDistribution } = dashboardData;
 
   return (
     <div className="ml-64 p-8 min-h-screen">
@@ -47,7 +59,7 @@ const DashboardPage = () => {
           </div>
           <div>
             <p className="text-gray-500 text-sm">Total Students</p>
-            <h3 className="text-2xl font-bold">20</h3>
+            <h3 className="text-2xl font-bold">{kpis.totalStudents}</h3>
           </div>
         </div>
         <div className="kpi-card flex items-center gap-4">
@@ -56,7 +68,7 @@ const DashboardPage = () => {
           </div>
           <div>
             <p className="text-gray-500 text-sm">Average GPA</p>
-            <h3 className="text-2xl font-bold">3.44</h3>
+            <h3 className="text-2xl font-bold">{kpis.averageGPA}</h3>
           </div>
         </div>
         <div className="kpi-card flex items-center gap-4">
@@ -65,7 +77,7 @@ const DashboardPage = () => {
           </div>
           <div>
             <p className="text-gray-500 text-sm">Attendance Rate</p>
-            <h3 className="text-2xl font-bold">88.8%</h3>
+            <h3 className="text-2xl font-bold">{kpis.attendanceRate}</h3>
           </div>
         </div>
         <div className="kpi-card flex items-center gap-4">
@@ -74,7 +86,7 @@ const DashboardPage = () => {
           </div>
           <div>
             <p className="text-gray-500 text-sm">Excellent Students</p>
-            <h3 className="text-2xl font-bold">40%</h3>
+            <h3 className="text-2xl font-bold">{kpis.excellentStudents}</h3>
           </div>
         </div>
       </div>
@@ -108,7 +120,7 @@ const DashboardPage = () => {
           </h4>
           {/* Pie chart logic tương tự Recharts... */}
           <div className="flex justify-center items-center h-64 text-gray-400 italic">
-            [Pie Chart: Male 10, Female 10]
+            [Pie Chart: {genderDistribution.map(g => `${g.name} ${g.value}`).join(", ")}]
           </div>
         </div>
       </div>

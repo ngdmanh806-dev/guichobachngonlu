@@ -1,7 +1,19 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Lightbulb, TrendingUp, AlertCircle } from "lucide-react";
+import API from "../services/api";
 
 const AnalyticsPage = () => {
+  const [insights, setInsights] = useState({
+    performanceAnalysis: "Class IT01 leads with an average GPA of 3.73 and an attendance rate of 92.5%.",
+    correlationInsight: "Students with attendance above 90% tend to have 15% higher GPAs than the average.",
+    improvementArea: "Class IT03 shows a declining trend in attendance. Targeted intervention recommended."
+  });
+
+  useEffect(() => {
+    API.get("/ui/insights")
+      .then((res) => setInsights(res.data))
+      .catch(console.error);
+  }, []);
   return (
     <div className="ml-64 p-8">
       <h2 className="text-2xl font-bold mb-8">Data Insights & Findings</h2>
@@ -15,8 +27,7 @@ const AnalyticsPage = () => {
             </h4>
           </div>
           <p className="text-blue-800">
-            Class <strong>IT01</strong> leads with an average GPA of 3.73 and an
-            attendance rate of 92.5%.
+            {insights.performanceAnalysis}
           </p>
         </div>
 
@@ -28,8 +39,7 @@ const AnalyticsPage = () => {
             </h4>
           </div>
           <p className="text-purple-800">
-            Students with attendance above <strong>90%</strong> tend to have 15%
-            higher GPAs than the average.
+            {insights.correlationInsight}
           </p>
         </div>
 
@@ -39,8 +49,7 @@ const AnalyticsPage = () => {
             <h4 className="font-bold text-teal-900">Areas for Improvement</h4>
           </div>
           <p className="text-teal-800">
-            Class <strong>IT03</strong> shows a declining trend in attendance.
-            Targeted intervention recommended.
+            {insights.improvementArea}
           </p>
         </div>
       </div>

@@ -91,3 +91,92 @@ class DashboardAnalyticsResponse(BaseModel):
     charts: DashboardCharts
     top_majors: List[MajorAdmissionItem]
     top_provinces: List[ProvinceCountItem]
+
+
+# --- New schemas for /students and /insights endpoints ---
+
+class StudentItem(BaseModel):
+    cccd: str
+    hoTen: str
+    gioiTinh: str
+    queQuan: str
+    tenNganh: str
+    diemXetTuyen: float
+
+class PaginatedStudents(BaseModel):
+    total: int
+    page: int
+    pageSize: int
+    data: List[StudentItem]
+
+class TopMajor(BaseModel):
+    tenNganh: str
+    average_score: float
+
+class TopProvince(BaseModel):
+    queQuan: str
+    student_count: int
+
+class ScoreStatistics(BaseModel):
+    average: float
+    max: float
+    min: float
+
+class ScoreDistributionBin(BaseModel):
+    range: str
+    count: int
+
+class InsightsResponse(BaseModel):
+    top_major: TopMajor
+    top_province: TopProvince
+    score_statistics: ScoreStatistics
+    score_distribution: List[ScoreDistributionBin]
+
+
+# --- New schemas for /ui endpoints (Exact Frontend Matches) ---
+
+class UIDashboardKPIs(BaseModel):
+    totalStudents: int
+    averageGPA: float
+    attendanceRate: str
+    excellentStudents: str
+
+class UINameValue(BaseModel):
+    name: str
+    value: int
+
+class UIGpaItem(BaseModel):
+    name: str
+    gpa: float
+
+class UIDashboardResponse(BaseModel):
+    kpis: UIDashboardKPIs
+    gpaData: List[UIGpaItem]
+    genderDistribution: List[UINameValue]
+
+
+class UIChartItem(BaseModel):
+    name: str
+    gpa: float
+    attendance: float
+
+
+class UIStudentItem(BaseModel):
+    id: str  # cccd
+    name: str
+    gender: str
+    major: str
+    gpa: float
+    attendance: str  # e.g "95%"
+
+class UIPaginatedStudents(BaseModel):
+    total: int
+    page: int
+    pageSize: int
+    data: List[UIStudentItem]
+
+
+class UIInsightsResponse(BaseModel):
+    performanceAnalysis: str
+    correlationInsight: str
+    improvementArea: str
