@@ -67,7 +67,9 @@ _ **Tìm kiếm:** Hỗ trợ tìm kiếm thời gian thực theo tên thí sinh
 ### 1. Cấu hình Backend
 
 cd backend\FastAPI
+
 python -m venv venv
+
 pip install -r requirements.txt
 
 # Cấu hình kết nối SQL Server trong file main.py hoặc .env
@@ -77,5 +79,7 @@ python -m uvicorn app.main:app --reload
 ### 2. Cấu hình Frontend
 
 cd frontend
+
 npm install
+
 npm start
