@@ -1,0 +1,30 @@
+@layer components {
+  /* Style cho Badge trạng thái */
+  .badge {
+    @apply px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-700;
+  }
+  .badge-primary {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  /* Style cho Input/Select */
+  .input-field {
+    @apply bg-slate-50 border-none rounded-xl text-sm px-4 py-2.5 
+           focus:ring-2 focus:ring-blue-100 outline-none transition-all;
+  }
+
+  /* Container chính */
+  .page-container {
+    @apply max-w-7xl mx-auto space-y-6 animate-fade-in-up;
+  }
+
+  /* Button NEU Style */
+  .btn-neu {
+    @apply px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold 
+           hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200;
+  }
+}
