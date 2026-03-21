@@ -46,7 +46,7 @@ def clean_admission_data(df: pd.DataFrame) -> pd.DataFrame:
                 # Thay 0
                 df.loc[df[col] == 0, col] = mean_value
             else:
-                # Nếu không có giá trị > 0, set NULL thành 0, giữ 0 như cũ
+                # Nếu không có giá trị > 0, set NULL thành 0,giữ 0 như cũ
                 df[col].fillna(0, inplace=True)
             
             # Ghi lại thống kê nếu có xử lý
