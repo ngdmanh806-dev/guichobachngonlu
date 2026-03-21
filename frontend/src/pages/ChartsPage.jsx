@@ -112,7 +112,7 @@ const ChartsPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Phân phối điểm xét tuyển" icon={TrendingUp}>
           <div className="h-[320px]">
-            <Histogram data={histogramData} stats={charts?.score_statistics} />
+            <Histogram data={histogramData}/>
           </div>
         </Card>
 
