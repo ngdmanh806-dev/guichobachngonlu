@@ -77,7 +77,7 @@ const StudentsPage = () => {
                   </td>
                   <td className="p-4 text-slate-600">{student.major}</td>
                   <td className="p-4 font-bold text-blue-600">
-                    {(student.gpa * 7.5).toFixed(1)}
+                    {student.gpa}
                   </td>
                 </tr>
               ))
